@@ -1,0 +1,35 @@
+<nav class="bg-gray-800 shadow-lg sticky top-0 z-50 h-10 w-10">
+    <div class="container mx-auto px-4">
+        <div class="flex justify-between items-center py-3">
+            
+            <div class="flex items-center space-x-8">
+                <a href="{% url 'app:dashboard' %}" class="text-white text-xl font-bold">บันทึกรายรับรายจ่าย</a>
+                <div class="hidden md:flex items-center space-x-4">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'app:dashboard' %}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">หน้าหลัก</a>
+                        <a href="{% url 'app:category_list' %}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">รายชื่อประเภท</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'app:profile' %}" class="flex items-center space-x-5 text-gray-300 hover:text-white transition">
+                            <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture"style="width: 50px; height: 50px; border-radius: 50%;">
+                        <span class="text-sm font-medium hidden sm:block">สวัสดี, {{ user.username }}</span>
+                    </a>
+
+                    <form action="{% url 'login_register:logout' %}" method="POST" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition duration-300 shadow-sm">
+                            ออกจากระบบ
+                        </button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login_register:login' %}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Login</a>
+                    <a href="{% url 'login_register:register' %}" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition duration-300 shadow-sm">Register</a>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</nav>

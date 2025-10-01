@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}เพิ่มประเภท - {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-xl shadow-lg">
+    <h1 class="text-2xl font-bold mb-6 text-gray-800">เพิ่มประเภทใหม่</h1>
+    
+    <form method="POST" class="space-y-6">
+        {% csrf_token %}
+        
+        {# --- ชื่อประเภท --- #}
+        <div>
+            <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.name.label }}</label>
+            <div class="mt-1">
+                {{ form.name }}
+            </div>
+            {% if form.name.errors %}<p class="text-red-500 text-xs italic mt-1">{{ form.name.errors|striptags }}</p>{% endif %}
+            <p class="text-xs text-gray-500 mt-1">เช่น เงินเดือน, ค่าอาหาร</p>
+        </div>
+
+        {# --- ชนิดของประเภท --- #}
+        <div>
+            <label for="{{ form.category_type.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.category_type.label }}</label>
+            <div class="mt-1">
+                {{ form.category_type }}
+            </div>
+            {% if form.category_type.errors %}<p class="text-red-500 text-xs italic mt-1">{{ form.category_type.errors|striptags }}</p>{% endif %}
+        </div>
+
+        {# --- เลือกไอคอน (จะถูกแปลงโฉมโดย Tom Select) --- #}
+        <div>
+            <label for="{{ form.icon_name.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.icon_name.label }}</label>
+            <div class="mt-1">
+                {{ form.icon_name }}
+            </div>
+             {% if form.icon_name.errors %}<p class="text-red-500 text-xs italic mt-1">{{ form.icon_name.errors|striptags }}</p>{% endif %}
+        </div>
+        
+        {# --- เลือกสี --- #}
+        <div>
+            <label for="{{ form.color_code.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.color_code.label }}</label>
+            <div class="mt-1">
+                {{ form.color_code }}
+            </div>
+            {% if form.color_code.errors %}<p class="text-red-500 text-xs italic mt-1">{{ form.color_code.errors|striptags }}</p>{% endif %}
+        </div>
+
+        {# --- คำอธิบาย --- #}
+        <div>
+            <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ form.description.label }}</label>
+            <div class="mt-1">
+                {{ form.description }}
+            </div>
+             {% if form.description.errors %}<p class="text-red-500 text-xs italic mt-1">{{ form.description.errors|striptags }}</p>{% endif %}
+        </div>
+        
+        {# --- ปุ่ม --- #}
+        <div class="mt-8 pt-6 border-t flex items-center justify-end space-x-4">
+            <!-- ปุ่มยกเลิก -->
+            <a href="{% url 'app:category_list' %}" 
+               class="px-6 py-2 bg-gray-200 text-gray-800 font-semibold rounded-full hover:bg-gray-300 transition duration-300 ease-in-out">
+                ยกเลิก
+            </a>
+        
+            <!-- ปุ่มบันทึก -->
+            <button type="submit" 
+                    class="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 shadow-md hover:shadow-lg transition duration-300 ease-in-out inline-flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"></path></svg>
+                บันทึก
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock content %}
+
+{% block javascript %}
+<script>
+    // รอให้หน้าเว็บโหลดเสร็จก่อน
+    document.addEventListener("DOMContentLoaded", function() {
+        // ค้นหา Dropdown ของเราด้วย id แล้วสั่งให้ Tom Select ทำงาน
+        new TomSelect("#{{ form.icon_name.id_for_label }}", {
+            render: {
+                // ฟังก์ชันสำหรับแสดงตัวเลือกแต่ละอันในลิสต์
+                option: function(data, escape) {
+                    return `<div><i class="${escape(data.value)} mr-3"></i><span>${escape(data.text)}</span></div>`;
+                },
+                // ฟังก์ชันสำหรับแสดงตัวเลือกที่ถูกเลือกแล้ว
+                item: function(data, escape) {
+                    // ป้องกันไม่ให้แสดงไอคอนสำหรับตัวเลือกที่เป็นค่าว่าง
+                    if (!data.value) {
+                        return `<div>${escape(data.text)}</div>`;
+                    }
+                    return `<div><i class="${escape(data.value)} mr-2"></i><span>${escape(data.text)}</span></div>`;
+                }
+            }
+        });
+    });
+</script>
+{% endblock javascript %}

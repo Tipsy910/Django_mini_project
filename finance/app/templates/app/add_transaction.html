@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}เพิ่มบันทึกรายรับรายจ่าย{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-md">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6">เพิ่มบันทึกรายรับรายจ่าย</h1>
+        
+        <form method="POST">
+            {% csrf_token %}
+            <div class="space-y-4">
+                
+                {{ form.as_p }}
+
+            </div>
+            <div class="mt-8 flex justify-end space-x-4">
+                <a href="{% url 'app:dashboard' %}" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">
+                    ยกเลิก
+                </a>
+                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
+                    บันทึก
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">Welcome, {{ request.user.username }}!</h1>
+        <p class="text-gray-600">ผลสรุปรายรับรายจ่ายต่อเดือน</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+            <div class="bg-green-100 p-6 rounded-lg shadow">
+                <h2 class="text-lg font-semibold text-green-800">รายรับทั้งหมด</h2>
+                <p class="text-2xl font-bold text-green-600 mt-2">฿{{ total_income|floatformat:2 }}</p>
+            </div>
+            <div class="bg-red-100 p-6 rounded-lg shadow">
+                <h2 class="text-lg font-semibold text-red-800">รายจ่ายทั้งหมด</h2>
+                <p class="text-2xl font-bold text-red-600 mt-2">฿{{ total_expense|floatformat:2 }}</p>
+            </div>
+            <div class="bg-blue-100 p-6 rounded-lg shadow">
+                <h2 class="text-lg font-semibold text-blue-800">เงินสุทธิ</h2>
+                <p class="text-2xl font-bold text-blue-600 mt-2">฿{{ net_balance|floatformat:2 }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-8">
+        <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">ประเภทของรายจ่าย</h2>
+            <canvas id="myPieChart"></canvas>
+        </div>
+        <div class="lg:col-span-3 bg-white p-6 rounded-lg shadow">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">ประวัติการใช้จ่าย</h2>
+                <div class="flex space-x-2">
+                    <a href="{% url 'app:category_list' %}" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 text-sm">จัดการประเภท</a>
+                    <a href="{% url 'app:add_transaction' %}" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 text-sm">+ บันทึกรายรับรายจ่าย</a>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">หัวข้อ</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ประเภท</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">วัน</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">จำนวนเงิน</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">แก้ไข/ลบ</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for transaction in transactions %}
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">{{ transaction.title }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" style="background-color: {{ transaction.category.color_code }}20; color: {{ transaction.category.color_code }};">
+                                    {{ transaction.category.name }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ transaction.transaction_date|date:"d M Y" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium
+                                {% if transaction.transaction_type == 'income' %}
+                                    text-green-600
+                                {% else %}
+                                    text-red-600
+                                {% endif %}
+                            ">
+                                {% if transaction.transaction_type == 'income' %}+{% else %}-{% endif %} ฿{{ transaction.amount|floatformat:2 }}
+                            </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                                    <a href="{% url 'edit_transaction' transaction.pk %}" class="text-indigo-600 hover:text-indigo-900">แก้ไข</a>
+                                    <a href="{% url 'delete_transaction' transaction.pk %}" class="text-red-600 hover:text-red-900">ลบ</a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                                ยังไม่บันทึกรายรับรายจ่าย
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">เงินสุทธิของเดือนนี้</h2>
+        <canvas id="myLineChart"></canvas>
+    </div>
+</div>
+
+{{ chart_labels|json_script:"chart-labels" }}
+{{ chart_data|json_script:"chart-data" }}
+{{ line_chart_labels|json_script:"line-chart-labels" }}
+{{ line_chart_data|json_script:"line-chart-data" }}
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- 1. Código para o Gráfico de Pizza ---
+        const pieLabels = JSON.parse(document.getElementById('chart-labels').textContent);
+        const pieData = JSON.parse(document.getElementById('chart-data').textContent);
+        const pieCtx = document.getElementById('myPieChart');
+
+        if (pieCtx && pieData.length > 0) {
+            new Chart(pieCtx.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: pieLabels,
+                    datasets: [{
+                        label: 'Expenses',
+                        data: pieData,
+                        backgroundColor: ['rgba(255, 99, 132, 0.8)', 'rgba(54, 162, 235, 0.8)', 'rgba(255, 206, 86, 0.8)', 'rgba(75, 192, 192, 0.8)', 'rgba(153, 102, 255, 0.8)', 'rgba(255, 159, 64, 0.8)'],
+                        borderColor: 'rgba(255, 255, 255, 0.5)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' }
+                    }
+                }
+            });
+        }
+
+        // --- 2. Código para o Gráfico de Linhas ---
+        const lineLabels = JSON.parse(document.getElementById('line-chart-labels').textContent);
+        const lineData = JSON.parse(document.getElementById('line-chart-data').textContent);
+        const lineCtx = document.getElementById('myLineChart');
+
+        if (lineCtx && lineData.length > 0) {
+            new Chart(lineCtx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: lineLabels,
+                    datasets: [{
+                        label: 'Net Balance',
+                        data: lineData,
+                        fill: false,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1,
+                        pointBackgroundColor: lineData.map(value => value >= 0 ? 'rgb(75, 192, 192)' : 'rgb(255, 99, 132)'),
+                        pointRadius: 5,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
