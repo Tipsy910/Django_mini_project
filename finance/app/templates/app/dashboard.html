@@ -72,8 +72,9 @@
                                 {% if transaction.transaction_type == 'income' %}+{% else %}-{% endif %} ฿{{ transaction.amount|floatformat:2 }}
                             </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                                    <a href="{% url 'edit_transaction' transaction.pk %}" class="text-indigo-600 hover:text-indigo-900">แก้ไข</a>
-                                    <a href="{% url 'delete_transaction' transaction.pk %}" class="text-red-600 hover:text-red-900">ลบ</a>
+                                    <a href="{% url 'app:edit_transaction' transaction.pk %}" class="text-indigo-600 hover:text-indigo-900">แก้ไข</a>
+                                    
+                                    <button type="button" onclick="openDeleteModal('{% url 'app:delete_transaction' transaction.pk %}')" class="text-red-600 hover:text-red-900">ลบ</button>
                                 </td>
                             </tr>
                         {% empty %}
@@ -95,70 +96,82 @@
     </div>
 </div>
 
+<div id="deleteModal" class="fixed z-50 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="closeDeleteModal()"></div>
+
+        <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div class="sm:flex sm:items-start">
+                    <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                        <svg class="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                            ยืนยันการลบ
+                        </h3>
+                        <div class="mt-2">
+                            <p class="text-sm text-gray-500">
+                                คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้? การกระทำนี้ไม่สามารถย้อนกลับได้
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <form id="deleteForm" method="POST" action="">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
+                        ยืนยันการลบ
+                    </button>
+                </form>
+                <button type="button" onclick="closeDeleteModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                    ยกเลิก
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {{ chart_labels|json_script:"chart-labels" }}
 {{ chart_data|json_script:"chart-data" }}
 {{ line_chart_labels|json_script:"line-chart-labels" }}
 {{ line_chart_data|json_script:"line-chart-data" }}
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // --- 1. Código para o Gráfico de Pizza ---
-        const pieLabels = JSON.parse(document.getElementById('chart-labels').textContent);
-        const pieData = JSON.parse(document.getElementById('chart-data').textContent);
-        const pieCtx = document.getElementById('myPieChart');
+document.addEventListener('DOMContentLoaded', () => {
+    // --- 1. Código para o Gráfico de Pizza ---
+    // (โค้ด Chart.js เดิมของคุณ ไม่ต้องเปลี่ยนแปลง)
+    const pieLabels = JSON.parse(document.getElementById('chart-labels').textContent);
+    const pieData = JSON.parse(document.getElementById('chart-data').textContent);
+    const pieCtx = document.getElementById('myPieChart');
+    if (pieCtx && pieData.length > 0) { new Chart(pieCtx.getContext('2d'), { type: 'pie', data: { labels: pieLabels, datasets: [{ label: 'Expenses', data: pieData, backgroundColor: ['rgba(255, 99, 132, 0.8)', 'rgba(54, 162, 235, 0.8)', 'rgba(255, 206, 86, 0.8)', 'rgba(75, 192, 192, 0.8)', 'rgba(153, 102, 255, 0.8)', 'rgba(255, 159, 64, 0.8)'], borderColor: 'rgba(255, 255, 255, 0.5)', borderWidth: 1 }] }, options: { responsive: true, plugins: { legend: { position: 'top' } } } }); }
 
-        if (pieCtx && pieData.length > 0) {
-            new Chart(pieCtx.getContext('2d'), {
-                type: 'pie',
-                data: {
-                    labels: pieLabels,
-                    datasets: [{
-                        label: 'Expenses',
-                        data: pieData,
-                        backgroundColor: ['rgba(255, 99, 132, 0.8)', 'rgba(54, 162, 235, 0.8)', 'rgba(255, 206, 86, 0.8)', 'rgba(75, 192, 192, 0.8)', 'rgba(153, 102, 255, 0.8)', 'rgba(255, 159, 64, 0.8)'],
-                        borderColor: 'rgba(255, 255, 255, 0.5)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { position: 'top' }
-                    }
-                }
-            });
-        }
+    // --- 2. Código para o Gráfico de Linhas ---
+    // (โค้ด Chart.js เดิมของคุณ ไม่ต้องเปลี่ยนแปลง)
+    const lineLabels = JSON.parse(document.getElementById('line-chart-labels').textContent);
+    const lineData = JSON.parse(document.getElementById('line-chart-data').textContent);
+    const lineCtx = document.getElementById('myLineChart');
+    if (lineCtx && lineData.length > 0) { new Chart(lineCtx.getContext('2d'), { type: 'line', data: { labels: lineLabels, datasets: [{ label: 'Net Balance', data: lineData, fill: false, borderColor: 'rgb(75, 192, 192)', tension: 0.1, pointBackgroundColor: lineData.map(value => value >= 0 ? 'rgb(75, 192, 192)' : 'rgb(255, 99, 132)'), pointRadius: 5 }] }, options: { responsive: true, scales: { y: { beginAtZero: true } } } }); }
+});
 
-        // --- 2. Código para o Gráfico de Linhas ---
-        const lineLabels = JSON.parse(document.getElementById('line-chart-labels').textContent);
-        const lineData = JSON.parse(document.getElementById('line-chart-data').textContent);
-        const lineCtx = document.getElementById('myLineChart');
+// ===== 3. เพิ่ม JavaScript สำหรับควบคุม Modal =====
+const deleteModal = document.getElementById('deleteModal');
+const deleteForm = document.getElementById('deleteForm');
 
-        if (lineCtx && lineData.length > 0) {
-            new Chart(lineCtx.getContext('2d'), {
-                type: 'line',
-                data: {
-                    labels: lineLabels,
-                    datasets: [{
-                        label: 'Net Balance',
-                        data: lineData,
-                        fill: false,
-                        borderColor: 'rgb(75, 192, 192)',
-                        tension: 0.1,
-                        pointBackgroundColor: lineData.map(value => value >= 0 ? 'rgb(75, 192, 192)' : 'rgb(255, 99, 132)'),
-                        pointRadius: 5,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        }
-    });
+function openDeleteModal(url) {
+    // กำหนด action ของ form ใน modal ให้เป็น URL ที่ส่งมา
+    deleteForm.action = url;
+    // แสดง modal โดยการลบคลาส 'hidden' ออก
+    deleteModal.classList.remove('hidden');
+}
+
+function closeDeleteModal() {
+    // ซ่อน modal โดยการเพิ่มคลาส 'hidden' กลับเข้าไป
+    deleteModal.classList.add('hidden');
+}
 </script>
 {% endblock %}

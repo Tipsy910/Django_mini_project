@@ -67,7 +67,7 @@ def add_transaction_view(request):
             transaction.user = request.user
             # บันทึกลง DB
             transaction.save()
-            return redirect('dashboard') # กลับไปหน้า dashboard
+            return redirect('app:dashboard') # กลับไปหน้า dashboard
     else:
         # ส่ง user เข้าไปในฟอร์มเพื่อกรอง category
         form = TransactionForm(user=request.user)
@@ -144,7 +144,7 @@ def delete_transaction_view(request, pk):
     transaction = get_object_or_404(Transaction, pk=pk, user=request.user)
     if request.method == 'POST':
         transaction.delete()
-        return redirect('dashboard')
+        return redirect('app:dashboard')
     return render(request, 'app/transaction_confirm_delete.html', {'transaction': transaction})
 
 @login_required # <-- decorator นี้จะทำให้หน้านี้เข้าได้เฉพาะคนที่ login แล้วเท่านั้น

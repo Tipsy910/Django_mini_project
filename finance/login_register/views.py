@@ -13,7 +13,7 @@ def register_view(request):
             user = form.save()
             login(request, user)
             messages.success(request, "สมัครสมาชิกสำเร็จ!")
-            return redirect('/')
+            return redirect('app:dashboard')
         else:
             # ไม่ต้องแสดง error message ตรงนี้ เพราะฟอร์มจะจัดการเอง
             pass
