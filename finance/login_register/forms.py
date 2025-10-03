@@ -51,3 +51,31 @@ class RegistrationForm(forms.ModelForm):
         if commit:
             user.save()
         return user
+    
+class PasswordResetRequestForm(forms.Form):
+    email = forms.EmailField(
+        label="อีเมล",
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'กรอกอีเมลของคุณ'})
+    )
+
+class SetNewPasswordForm(forms.Form):
+    new_password1 = forms.CharField(
+        label="รหัสผ่านใหม่",
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        strip=False
+    )
+    new_password2 = forms.CharField(
+        label="ยืนยันรหัสผ่านใหม่",
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        strip=False
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        new_password1 = cleaned_data.get("new_password1")
+        new_password2 = cleaned_data.get("new_password2")
+
+        if new_password1 and new_password2 and new_password1 != new_password2:
+            raise forms.ValidationError("รหัสผ่านทั้งสองช่องไม่ตรงกัน")
+            
+        return cleaned_data

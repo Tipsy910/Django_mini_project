@@ -1,2 +1,4 @@
 Django
 pillow
+django-sendgrid-v5
+python-dotenv

@@ -29,8 +29,8 @@ class Category(models.Model):
 class Transaction(models.Model):
     """Model for income and expense transactions"""
     TRANSACTION_TYPES = [
-        ('income', 'Income'),
-        ('expense', 'Expense'),
+        ('income', 'รายรับ'),
+        ('expense', 'รายจ่าย'),
     ]
     
     PAYMENT_METHODS = [

@@ -49,7 +49,18 @@
                 </button>
             </div>
         </form>
+        <form class="space-y-6" method="POST" action="{% url 'login_register:login' %}">
+    {% csrf_token %}
 
+        <div class="flex items-center justify-center">
+            <div class="text-sm">
+                <a href="{% url 'login_register:password_reset_request' %}" class="font-medium text-indigo-600 hover:text-indigo-500">
+                    ลืมรหัสผ่าน?
+                </a>
+            </div>
+        </div>
+
+        </form>
         <p class="text-sm text-center text-gray-600">
             ยังไม่มีบัญชี?
             <a href="{% url 'login_register:register' %}" class="font-medium text-indigo-600 hover:text-indigo-500">

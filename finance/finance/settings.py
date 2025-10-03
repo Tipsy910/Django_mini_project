@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -31,14 +33,17 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'login_register',
     'app.apps.AppConfig',
+    'login_register',
+
+
 ]
 
 MIDDLEWARE = [
@@ -132,3 +137,16 @@ LOGOUT_REDIRECT_URL = '/login/' # หลังจาก logout สำเร็�
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+# สำหรับการส่งอีเมลจริงใน production ควรตั้งค่า EMAIL_BACKEND เป็น SMTP backend และตั้งค่าอื่นๆ ที่เกี่ยวข้อง
+# เช่น EMAIL_HOST, EMAIL_PORT, EMAIL_USE_TLS, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
+# ดูรายละเอียดเพิ่มเติมได้ที่ https://docs.djangoproject.com/en/5.2/topics/email/
+# ตัวอย่างการตั้งค่า SMTP (สำหรับ Gmail)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.sendgrid.net'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'apikey' # <-- สำคัญมาก: ต้องใส่คำว่า 'apikey' แบบนี้เลย ไม่ใช่ชื่ออีเมล
+EMAIL_HOST_PASSWORD = os.getenv('SENDGRID_API_KEY') # <-- ดึง API Key มาจาก .env
+DEFAULT_FROM_EMAIL = os.getenv('MAIL') # <-- อีเมลที่คุณใช้ยืนยันกับ SendGrid (Single Sender Verification)

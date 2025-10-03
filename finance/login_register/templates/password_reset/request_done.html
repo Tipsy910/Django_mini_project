@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex items-center justify-center min-h-screen bg-gray-100">
+    <div class="w-full max-w-md p-8 space-y-6 text-center bg-white rounded-lg shadow-md">
+        
+        <h2 class="text-2xl font-bold text-gray-900">ตรวจสอบอีเมลของคุณ</h2>
+        
+        <p class="text-gray-600">
+            เราได้ส่งคำแนะนำในการตั้งรหัสผ่านใหม่ไปที่อีเมลของคุณแล้ว (หากอีเมลนั้นมีอยู่ในระบบ)
+        </p>
+        
+        <p class="text-sm text-gray-500">
+            หากคุณไม่ได้รับอีเมล กรุณาตรวจสอบโฟลเดอร์สแปม (Junk/Spam)
+        </p>
+
+        <div class="pt-4">
+            <a href="{% url 'login_register:password_reset_request' %}" class="w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+                ไม่ได้รับอีเมล? ลองอีกครั้ง
+            </a>
+        </div>
+
+        <div class="pt-2">
+            <a href="{% url 'login_register:login' %}" class="text-sm text-indigo-600 hover:underline">
+                กลับไปหน้าเข้าสู่ระบบ
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
